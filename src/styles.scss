@@ -1,1 +1,48 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import '../node_modules/bootstrap/scss/_functions';
+
+// colors
+
+$blue: #34657F;
+$gray-600: #495057;
+$green: #4CAF50;
+$cyan: #17A2B8;
+$yellow: #FFC107;
+$red: #DC3545;
+$gray-100: #f8f9fa;
+$gray-900: #212529;
+
+$primary: $blue !default;
+$secondary: $gray-600 !default;
+$success: $green !default;
+$info: $cyan !default;
+$warning: $yellow !default;
+$danger: $red !default;
+$light: $gray-100 !default;
+$dark: $gray-900 !default;
+
+// override
+
+$body-bg: $dark;
+$body-color: $light;
+
+@import '../node_modules/bootstrap/scss/_variables';
+
+$custom-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark
+) !default;
+
+
+$theme-colors: map-merge($theme-colors, $custom-colors);
+
+@import '../node_modules/bootstrap/scss/bootstrap';
+
