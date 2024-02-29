@@ -1,1 +1,16 @@
-<p>contact works!</p>
+<div class="h-full w-full flex flex-row justify-content-between">
+  <div class="flex-1"><h2>Interview</h2>
+    <div *ngFor="let question of questions$()" class="bg-black p-2 mb-3">
+      {{ question.questionText }} - {{ question.status }}
+    </div>
+
+    <form (submit)="onSubmitQuestion()" class="flex gap-2">
+      <input [formControl]="questionFormControl" class="form-control" placeholder="Pose une question" type="text"/>
+      <button class="btn btn-primary" type="submit">Envoyer</button>
+    </form>
+
+
+  </div>
+  <div class="h-full bg-gray-200 w-px mx-3"></div>
+  <div class="flex-1">contact</div>
+</div>

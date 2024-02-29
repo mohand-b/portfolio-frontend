@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {MenuItem} from "../main-menu/main-menu.component";
 import {RouterLink, RouterLinkActive} from "@angular/router";
 
@@ -12,12 +12,8 @@ import {RouterLink, RouterLinkActive} from "@angular/router";
   templateUrl: './main-menu-item.component.html',
   styleUrl: './main-menu-item.component.scss'
 })
-export class MainMenuItemComponent implements OnInit {
+export class MainMenuItemComponent {
 
   @Input() menuItem!: MenuItem;
-  protected readonly indexedDB = indexedDB;
 
-  ngOnInit(): void {
-    console.log(this.menuItem);
-  }
 }
