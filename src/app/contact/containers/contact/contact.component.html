@@ -1,12 +1,15 @@
 <div class="h-full w-full flex flex-row justify-content-between">
   <div class="flex-1"><h2>Interview</h2>
-    <div *ngFor="let question of questions$()" class="bg-black p-2 mb-3">
-      {{ question.questionText }} - {{ question.status }}
+    <div class="flex flex-col gap-2 my-3">
+      <app-sequence-item (cancelEvent)="onCancelQuestion($event)" *ngFor="let question of questions$()"
+                         [sequence]="question"/>
     </div>
 
-    <form (submit)="onSubmitQuestion()" class="flex gap-2">
+    <form (submit)="onSubmitQuestion($event)" class="flex gap-2">
       <input [formControl]="questionFormControl" class="form-control" placeholder="Pose une question" type="text"/>
-      <button class="btn btn-primary" type="submit">Envoyer</button>
+      <button [disabled]="questionFormControl.invalid || questionFormControl.disabled" class="btn btn-primary"
+              type="submit">Envoyer
+      </button>
     </form>
 
 

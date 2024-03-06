@@ -4,6 +4,7 @@ import {environment} from "../../../../environments/environment";
 import {QuestionDto} from "./interview.model";
 import {Observable} from "rxjs";
 
+
 @Injectable({providedIn: 'root'})
 export class InterviewService {
 
@@ -20,6 +21,10 @@ export class InterviewService {
 
   getAnsweredQuestions(): Observable<QuestionDto[]> {
     return this.http.get<QuestionDto[]>(`${this.questionsBaseUrl}/answered/`);
+  }
+
+  deleteQuestion(questionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.questionsBaseUrl}/delete/${questionId}`);
   }
 
 }

@@ -2,7 +2,7 @@ import {createStore} from "@ngneat/elf";
 import {inject, Injectable, Signal} from "@angular/core";
 import {InterviewService} from "./state/interview/interview.service";
 import {QuestionDto, QuestionStatusEnum} from "./state/interview/interview.model";
-import {addEntities, selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
+import {addEntities, deleteEntities, selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
 import {map, tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
 
@@ -45,11 +45,14 @@ export class ContactFacade {
     );
   }
 
-  getQuestionByUniqueId(questionUniqueId: string) {
+  loadQuestionByUniqueId(questionUniqueId: string) {
     return this.interviewService.getQuestionByUniqueId(questionUniqueId).pipe(
       tap({
         next: (question) => {
-          interviewStore.update(addEntities(question));
+          if (question.status === QuestionStatusEnum.Pending) {
+            interviewStore.update(addEntities(question));
+          }
+          return question;
         },
         error: (error) => {
           console.error('Error getting question', error);
@@ -58,7 +61,7 @@ export class ContactFacade {
     );
   }
 
-  getAnsweredQuestions() {
+  loadAnsweredQuestions() {
     return this.interviewService.getAnsweredQuestions().pipe(
       tap({
         next: (questions) => {
@@ -73,6 +76,20 @@ export class ContactFacade {
         },
         error: (error) => {
           console.error('Error getting answered questions', error);
+        }
+      })
+    );
+  }
+
+  cancelQuestion(questionId: number) {
+    return this.interviewService.deleteQuestion(questionId).pipe(
+      tap({
+        next: () => {
+          interviewStore.update(deleteEntities(questionId));
+          localStorage.removeItem('lastSubmittedQuestionUniqueId');
+        },
+        error: (error) => {
+          console.error('Error deleting question', error);
         }
       })
     );

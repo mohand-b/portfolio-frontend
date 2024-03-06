@@ -3,6 +3,7 @@ import {ContactFacade} from "../../contact.facade";
 import {of, Subscription, switchMap} from "rxjs";
 import {FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgForOf} from "@angular/common";
+import {SequenceItemComponent} from "../../components/sequence-item/sequence-item.component";
 import {QuestionStatusEnum} from "../../state/interview/interview.model";
 
 @Component({
@@ -10,7 +11,8 @@ import {QuestionStatusEnum} from "../../state/interview/interview.model";
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgForOf
+    NgForOf,
+    SequenceItemComponent
   ],
   templateUrl: './contact.component.html',
   styleUrl: './contact.component.scss'
@@ -22,48 +24,46 @@ export class ContactComponent implements OnInit, OnDestroy {
     nonNullable: true,
     validators: [Validators.required, Validators.minLength(3)]
   });
-  questionAlreadySubmitted = localStorage.getItem('lastSubmittedQuestionUniqueId') !== null;
   questions$ = this.contactFacade.questions$;
   isLoading$ = signal(false);
-  onLoading = effect(() => {
+  toggleQuestionFormState = effect(() => {
     if (this.isLoading$() || this.questions$().some(q => q.status === QuestionStatusEnum.Pending)) {
       this.questionFormControl.disable();
     } else {
       this.questionFormControl.enable();
     }
-  })
+  });
+
   private subscription = new Subscription();
 
   ngOnInit() {
     const uniqueId = localStorage.getItem('lastSubmittedQuestionUniqueId');
 
-    this.subscription.add(this.contactFacade.getAnsweredQuestions().pipe(
+    this.subscription.add(this.contactFacade.loadAnsweredQuestions().pipe(
       switchMap(() => {
-        return uniqueId ? this.contactFacade.getQuestionByUniqueId(uniqueId) : of(null)
+        return uniqueId ? this.contactFacade.loadQuestionByUniqueId(uniqueId) : of(null)
       })
-    ).subscribe({
-      next: res => {
-        if (res) {
-          this.questionFormControl.disable();
-        }
-      },
-      error: err => console.error(err)
-    }));
-
+    ).subscribe());
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  onSubmitQuestion() {
+  onSubmitQuestion(event: Event) {
+    event.preventDefault();
     if (this.questionFormControl.invalid) {
+      console.log('invalid form');
       return;
     }
-    this.subscription.add(this.contactFacade.submitQuestion(this.questionFormControl.value).subscribe({
-      next: res => console.log(res),
-      error: err => console.error(err)
-    }));
+    this.contactFacade.submitQuestion(this.questionFormControl.value).subscribe({
+      next: () => this.questionFormControl.reset(),
+      error: (error) => console.error('Erreur lors de la soumission', error)
+    });
+  }
+
+  onCancelQuestion(id: number) {
+    this.contactFacade.cancelQuestion(id).subscribe();
   }
 
 
