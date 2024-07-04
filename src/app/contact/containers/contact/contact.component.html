@@ -1,8 +1,9 @@
 <div class="h-full w-full flex flex-row justify-content-between">
   <div class="flex-1"><h2>Interview</h2>
     <div class="flex flex-col gap-2 my-3">
-      <app-sequence-item (cancelEvent)="onCancelQuestion($event)" *ngFor="let question of questions$()"
-                         [sequence]="question"/>
+      @for (question of questions$(); track question.id) {
+        <app-sequence-item (cancelEvent)="onCancelQuestion($event)" [sequence]="question"/>
+      }
     </div>
 
     <form (submit)="onSubmitQuestion($event)" class="flex gap-2">

@@ -12,7 +12,7 @@ export class InterviewService {
   private readonly questionsBaseUrl = `${environment.apiUrl}/questions`;
 
   submitQuestion(question: string): Observable<QuestionDto> {
-    return this.http.post<QuestionDto>(`${this.questionsBaseUrl}/submit`, {question_text: question});
+    return this.http.post<QuestionDto>(`${this.questionsBaseUrl}/submit`, {questionText: question});
   }
 
   getQuestionByUniqueId(questionUniqueId: string): Observable<QuestionDto> {
@@ -20,11 +20,12 @@ export class InterviewService {
   }
 
   getAnsweredQuestions(): Observable<QuestionDto[]> {
-    return this.http.get<QuestionDto[]>(`${this.questionsBaseUrl}/answered/`);
+    return this.http.get<QuestionDto[]>(`${this.questionsBaseUrl}?status=answered`);
   }
 
   deleteQuestion(questionId: number): Observable<void> {
-    return this.http.delete<void>(`${this.questionsBaseUrl}/delete/${questionId}`);
+    return this.http.delete<void>(`${this.questionsBaseUrl}/${questionId}`);
   }
+
 
 }

@@ -2,14 +2,14 @@
   <div class="flex flex-row justify-between align-items-center">
     <div class="flex gap-2 align-items-center">
       <div class="text-primary">{{ sequence.questionText }}</div>
-      <div *ngIf="sequence.status === 'pending'" class="text-xs text-warning">{{ sequence.status }}</div>
-      <button (click)="onCancel(sequence.id)" *ngIf="sequence.status === 'pending'" class="btn btn-sm btn-danger">
-        Annuler
-      </button>
+      @if (sequence.status === 'pending') {
+        <div class="text-xs text-warning">{{ sequence.status }}</div>
+        <button (click)="onCancel(sequence.id)" class="btn btn-sm btn-danger">Annuler</button>
+      }
     </div>
     <div class="text-xs text-gray-400">{{ sequence.createdAt | date: 'dd/MM/yyyy à hh:mm' }}</div>
   </div>
-  <div *ngIf="sequence.responseOrReason" class="rounded-3 bg-secondary p-2">
-    {{ sequence.responseOrReason  }}
-  </div>
+  @if (sequence.responseOrReason) {
+    <div class="rounded-3 bg-secondary p-2">{{ sequence.responseOrReason }}</div>
+  }
 </div>
