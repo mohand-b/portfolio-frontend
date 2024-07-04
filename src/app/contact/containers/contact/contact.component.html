@@ -1,20 +1,32 @@
 <div class="h-full w-full flex flex-row justify-content-between">
-  <div class="flex-1"><h2>Interview</h2>
+
+  <div class="flex-1 flex flex-col">
+    <h2>contactez-moi</h2>
+    <div class="text-primary">parlez-moi de vos projet</div>
+  </div>
+
+
+  <div class="flex-1 flex flex-col gap-4">
+    <div class="flex flex-col">
+      <h2>des questions ?</h2>
+      <p class="text-primary">posez vos questions et je vous réponds</p>
+    </div>
+
+    <form (submit)="onSubmitQuestion($event)" class="flex flex-col gap-3">
+      <input [formControl]="questionFormControl" class="form-control" placeholder="Votre question" type="text"/>
+      <button [disabled]="questionFormControl.invalid || questionFormControl.disabled"
+              class="btn btn-primary w-auto self-start" type="submit">
+        Envoyer votre question
+      </button>
+    </form>
+
+
     <div class="flex flex-col gap-2 my-3">
       @for (question of questions$(); track question.id) {
         <app-sequence-item (cancelEvent)="onCancelQuestion($event)" [sequence]="question"/>
       }
     </div>
 
-    <form (submit)="onSubmitQuestion($event)" class="flex gap-2">
-      <input [formControl]="questionFormControl" class="form-control" placeholder="Pose une question" type="text"/>
-      <button [disabled]="questionFormControl.invalid || questionFormControl.disabled" class="btn btn-primary"
-              type="submit">Envoyer
-      </button>
-    </form>
-
 
   </div>
-  <div class="h-full bg-gray-200 w-px mx-3"></div>
-  <div class="flex-1">contact</div>
 </div>
