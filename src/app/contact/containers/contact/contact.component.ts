@@ -1,10 +1,11 @@
-import {Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, effect, inject, OnInit, Signal, signal, WritableSignal} from '@angular/core';
 import {ContactFacade} from "../../contact.facade";
-import {of, Subscription, switchMap} from "rxjs";
-import {FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
+import {of, switchMap} from "rxjs";
+import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgForOf} from "@angular/common";
 import {SequenceItemComponent} from "../../components/sequence-item/sequence-item.component";
-import {QuestionStatusEnum} from "../../state/interview/interview.model";
+import {QuestionDto, QuestionStatusEnum} from "../../state/interview/interview.model";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-contact',
@@ -17,15 +18,16 @@ import {QuestionStatusEnum} from "../../state/interview/interview.model";
   templateUrl: './contact.component.html',
   styleUrl: './contact.component.scss'
 })
-export class ContactComponent implements OnInit, OnDestroy {
+export class ContactComponent implements OnInit {
 
   contactFacade = inject(ContactFacade);
-  questionFormControl = new FormControl('', {
+  questions$: Signal<QuestionDto[]> = this.contactFacade.questions$;
+  isLoading$: WritableSignal<boolean> = signal(false);
+  private fb = inject(FormBuilder);
+  questionFormControl = this.fb.control('', {
     nonNullable: true,
     validators: [Validators.required, Validators.minLength(3)]
   });
-  questions$ = this.contactFacade.questions$;
-  isLoading$ = signal(false);
   toggleQuestionFormState = effect(() => {
     if (this.isLoading$() || this.questions$().some(q => q.status === QuestionStatusEnum.Pending)) {
       this.questionFormControl.disable();
@@ -33,21 +35,24 @@ export class ContactComponent implements OnInit, OnDestroy {
       this.questionFormControl.enable();
     }
   });
-
-  private subscription = new Subscription();
+  contactFormGroup = this.fb.group({
+    name: this.fb.control('', Validators.required),
+    surname: this.fb.control('', Validators.required),
+    email: this.fb.control('', [Validators.required, Validators.email]),
+    subject: this.fb.control('', Validators.required),
+    message: this.fb.control('', Validators.required)
+  });
+  private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit() {
     const uniqueId = localStorage.getItem('lastSubmittedQuestionUniqueId');
 
-    this.subscription.add(this.contactFacade.loadAnsweredQuestions().pipe(
+    this.contactFacade.loadAnsweredQuestions().pipe(
+      takeUntilDestroyed(this.destroyRef),
       switchMap(() => {
         return uniqueId ? this.contactFacade.loadQuestionByUniqueId(uniqueId) : of(null)
       })
-    ).subscribe());
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+    ).subscribe();
   }
 
   onSubmitQuestion(event: Event) {

@@ -3,7 +3,7 @@
 @tailwind utilities;
 @import '../node_modules/bootstrap/scss/_functions';
 
-// colors
+// COLORS
 
 $blue: #34657F;
 $gray-600: #495057;
@@ -23,14 +23,22 @@ $danger: $red !default;
 $light: $gray-100 !default;
 $dark: $gray-900 !default;
 
-// override
-
 $body-bg: $dark;
 $body-color: $light;
 
+// OVERWRITING BOOTSTRAP PROPERTIES
+
+// buttons
 $btn-border-radius: 4rem;
 $btn-padding-x: 1.25rem;
 $btn-padding-y: 0.5rem;
+$btn-font-size: .875rem;
+
+// inputs
+$form-label-font-size: .875rem;
+$form-label-font-weight: 600;
+$form-label-margin-bottom: 0;
+$input-border-color: $gray-600;
 
 @import '../node_modules/bootstrap/scss/_variables';
 
@@ -49,4 +57,3 @@ $custom-colors: (
 $theme-colors: map-merge($theme-colors, $custom-colors);
 
 @import '../node_modules/bootstrap/scss/bootstrap';
-

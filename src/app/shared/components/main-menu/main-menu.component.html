@@ -1,5 +1,11 @@
-<div class="flex gap-4">
-  @for (item of menuItems; track item) {
-    <app-main-menu-item [menuItem]="item"/>
-  }
+<div class="flex items-center justify-between gap-4">
+  <h3 class="flex-grow font-bold">
+    mohand
+    <span class="text-primary">boudjema</span>
+  </h3>
+  <div class="flex gap-4">
+    @for (item of menuItems; track item) {
+      <app-main-menu-item [menuItem]="item"></app-main-menu-item>
+    }
+  </div>
 </div>

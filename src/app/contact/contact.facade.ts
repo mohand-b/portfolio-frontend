@@ -21,14 +21,15 @@ export class ContactFacade {
     selectAllEntities(),
     map(questions => questions.sort((a, b) => {
       if (a.status === QuestionStatusEnum.Pending && b.status !== QuestionStatusEnum.Pending) {
-        return 1;
-      } else if (a.status !== QuestionStatusEnum.Pending && b.status === QuestionStatusEnum.Pending) {
         return -1;
+      } else if (a.status !== QuestionStatusEnum.Pending && b.status === QuestionStatusEnum.Pending) {
+        return 1;
       }
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }))), {
     initialValue: []
   });
+
   private interviewService = inject(InterviewService);
 
   submitQuestion(question: string) {

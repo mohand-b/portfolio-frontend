@@ -1,15 +1,17 @@
 <div class="flex flex-col">
   <div class="flex flex-row justify-between align-items-center">
     <div class="flex gap-2 align-items-center">
-      <div class="text-primary">{{ sequence.questionText }}</div>
+      <div class="text-gray-500">{{ sequence.questionText }}</div>
       @if (sequence.status === 'pending') {
-        <div class="text-xs text-warning">{{ sequence.status }}</div>
-        <button (click)="onCancel(sequence.id)" class="btn btn-sm btn-danger">Annuler</button>
+        <button class="btn btn-warning" (click)="onCancel(sequence.id)">Annuler</button>
       }
     </div>
-    <div class="text-xs text-gray-400">{{ sequence.createdAt | date: 'dd/MM/yyyy à hh:mm' }}</div>
   </div>
+  @if (sequence.status === 'pending') {
+    <div class="text-xs text-warning">En attention d'une réponse</div>
+  }
   @if (sequence.responseOrReason) {
-    <div class="rounded-3 bg-secondary p-2">{{ sequence.responseOrReason }}</div>
+    <div class="text-primary">Ma réponse :</div>
+    <div class="p-2">{{ sequence.responseOrReason }}</div>
   }
 </div>
