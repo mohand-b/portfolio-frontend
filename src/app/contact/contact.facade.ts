@@ -5,6 +5,8 @@ import {QuestionDto, QuestionStatusEnum} from "./state/interview/interview.model
 import {addEntities, deleteEntities, selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
 import {map, tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
+import {ContactService} from "./state/contact/contact.service";
+import {ContactDto} from "./state/contact/contact.model";
 
 const interviewStore = createStore({
     name: 'interview',
@@ -31,6 +33,11 @@ export class ContactFacade {
   });
 
   private interviewService = inject(InterviewService);
+  private contactService = inject(ContactService);
+
+  sendContactMail(contactDto: ContactDto) {
+    return this.contactService.sendContactMail(contactDto);
+  }
 
   submitQuestion(question: string) {
     return this.interviewService.submitQuestion(question).pipe(

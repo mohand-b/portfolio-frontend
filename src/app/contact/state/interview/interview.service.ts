@@ -9,7 +9,7 @@ import {Observable} from "rxjs";
 export class InterviewService {
 
   private http = inject(HttpClient);
-  private readonly questionsBaseUrl = `${environment.apiUrl}/questions`;
+  private readonly questionsBaseUrl = `${environment.baseUrl}/questions`;
 
   submitQuestion(question: string): Observable<QuestionDto> {
     return this.http.post<QuestionDto>(`${this.questionsBaseUrl}/submit`, {questionText: question});
