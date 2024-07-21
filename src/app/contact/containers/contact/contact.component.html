@@ -62,10 +62,17 @@
         <input [formControl]="questionFormControl" class="form-control" placeholder="Votre question" type="text"/>
       </div>
 
-      <button [disabled]="questionFormControl.invalid || questionFormControl.disabled"
-              class="btn btn-primary w-auto self-start" type="submit">
-        Envoyer votre question
-      </button>
+      <div class="flex items-center gap-3">
+        <button [disabled]="questionFormControl.invalid || questionFormControl.disabled"
+                class="btn btn-primary w-auto self-start" type="submit">
+          Envoyer votre question
+        </button>
+
+        <button (click)="onOpenQuestionTrackingModal()" class="btn btn-warning w-auto self-start" type="button">
+          Suivre une question
+        </button>
+      </div>
+
     </form>
 
     <div class="my-4 w-1/2 h-0.5 bg-gray-300 rounded-full"></div>

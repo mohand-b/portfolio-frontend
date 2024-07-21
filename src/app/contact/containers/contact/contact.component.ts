@@ -86,4 +86,7 @@ export class ContactComponent implements OnInit {
   }
 
 
+  onOpenQuestionTrackingModal() {
+
+  }
 }
