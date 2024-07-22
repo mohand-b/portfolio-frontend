@@ -1,12 +1,16 @@
 import {Component, DestroyRef, effect, inject, OnInit, Signal, signal, WritableSignal} from '@angular/core';
 import {ContactFacade} from "../../contact.facade";
-import {of, switchMap} from "rxjs";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgForOf} from "@angular/common";
 import {SequenceItemComponent} from "../../components/sequence-item/sequence-item.component";
-import {QuestionDto, QuestionStatusEnum} from "../../state/interview/interview.model";
+import {QuestionDto} from "../../state/interview/interview.model";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ContactDto} from "../../state/contact/contact.model";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {
+  QuestionTrackingModalComponent
+} from "../../components/question-tracking-modal/question-tracking-modal.component";
+import {MatBadgeModule} from "@angular/material/badge";
 
 @Component({
   selector: 'app-contact',
@@ -14,23 +18,26 @@ import {ContactDto} from "../../state/contact/contact.model";
   imports: [
     ReactiveFormsModule,
     NgForOf,
-    SequenceItemComponent
+    SequenceItemComponent,
+    MatBadgeModule
   ],
   templateUrl: './contact.component.html',
   styleUrl: './contact.component.scss'
 })
 export class ContactComponent implements OnInit {
 
+  lastSubmittedQuestionUniqueId: string | null = localStorage.getItem('lastSubmittedQuestionUniqueId');
   contactFacade = inject(ContactFacade);
   questions$: Signal<QuestionDto[]> = this.contactFacade.questions$;
   isLoading$: WritableSignal<boolean> = signal(false);
   toggleQuestionFormState = effect(() => {
-    if (this.isLoading$() || this.questions$().some(q => q.status === QuestionStatusEnum.Pending)) {
+    if (this.isLoading$()) {
       this.questionFormControl.disable();
     } else {
       this.questionFormControl.enable();
     }
   });
+  private modalService = inject(NgbModal);
   private fb = inject(NonNullableFormBuilder);
   questionFormControl = this.fb.control('', {
     validators: [Validators.required, Validators.minLength(3)]
@@ -42,17 +49,11 @@ export class ContactComponent implements OnInit {
     subject: this.fb.control<string>('', Validators.required),
     message: this.fb.control<string>('', Validators.required)
   }) as FormGroup<{ [K in keyof ContactDto]: FormControl<ContactDto[K]> }>;
-
   private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    const uniqueId = localStorage.getItem('lastSubmittedQuestionUniqueId');
-
     this.contactFacade.loadAnsweredQuestions().pipe(
       takeUntilDestroyed(this.destroyRef),
-      switchMap(() => {
-        return uniqueId ? this.contactFacade.loadQuestionByUniqueId(uniqueId) : of(null)
-      })
     ).subscribe();
   }
 
@@ -63,7 +64,10 @@ export class ContactComponent implements OnInit {
       return;
     }
     this.contactFacade.submitQuestion(this.questionFormControl.value).subscribe({
-      next: () => this.questionFormControl.reset(),
+      next: (question) => {
+        this.lastSubmittedQuestionUniqueId = question.uniqueId;
+        this.questionFormControl.reset()
+      },
       error: (error) => console.error('Erreur lors de la soumission', error)
     });
   }
@@ -87,6 +91,13 @@ export class ContactComponent implements OnInit {
 
 
   onOpenQuestionTrackingModal() {
+    const modalRef = this.modalService.open(QuestionTrackingModalComponent, {
+      size: 'lg',
+      centered: true
+    })
+
+    modalRef.componentInstance.uniqueId = localStorage.getItem('lastSubmittedQuestionUniqueId');
+
 
   }
 }

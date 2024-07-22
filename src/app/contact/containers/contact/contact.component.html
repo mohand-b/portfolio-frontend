@@ -68,7 +68,10 @@
           Envoyer votre question
         </button>
 
-        <button (click)="onOpenQuestionTrackingModal()" class="btn btn-warning w-auto self-start" type="button">
+        <button (click)="onOpenQuestionTrackingModal()" [matBadgeHidden]="!lastSubmittedQuestionUniqueId" [matBadge]="1"
+                class="btn btn-warning w-auto self-start"
+                matBadgeColor="accent"
+                type="button">
           Suivre une question
         </button>
       </div>

@@ -2,14 +2,8 @@
   <div class="flex flex-row justify-between align-items-center">
     <div class="flex gap-2 align-items-center">
       <div class="text-gray-500">{{ sequence.questionText }}</div>
-      @if (sequence.status === 'pending') {
-        <button class="btn btn-warning" (click)="onCancel(sequence.id)">Annuler</button>
-      }
     </div>
   </div>
-  @if (sequence.status === 'pending') {
-    <div class="text-xs text-warning">En attention d'une réponse</div>
-  }
   @if (sequence.responseOrReason) {
     <div class="text-primary">Ma réponse :</div>
     <div class="p-2">{{ sequence.responseOrReason }}</div>

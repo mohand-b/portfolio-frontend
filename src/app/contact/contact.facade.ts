@@ -2,7 +2,7 @@ import {createStore} from "@ngneat/elf";
 import {inject, Injectable, Signal} from "@angular/core";
 import {InterviewService} from "./state/interview/interview.service";
 import {QuestionDto, QuestionStatusEnum} from "./state/interview/interview.model";
-import {addEntities, deleteEntities, selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
+import {deleteEntities, selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
 import {map, tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ContactService} from "./state/contact/contact.service";
@@ -14,14 +14,13 @@ const interviewStore = createStore({
   withEntities<QuestionDto>(),
 )
 
-
 @Injectable({providedIn: 'root'})
 export class ContactFacade {
 
 
   questions$: Signal<QuestionDto[]> = toSignal(interviewStore.pipe(
     selectAllEntities(),
-    map(questions => questions.sort((a, b) => {
+    map((questions: QuestionDto[]) => questions.sort((a, b) => {
       if (a.status === QuestionStatusEnum.Pending && b.status !== QuestionStatusEnum.Pending) {
         return -1;
       } else if (a.status !== QuestionStatusEnum.Pending && b.status === QuestionStatusEnum.Pending) {
@@ -43,7 +42,6 @@ export class ContactFacade {
     return this.interviewService.submitQuestion(question).pipe(
       tap({
         next: (question) => {
-          interviewStore.update(addEntities(question));
           localStorage.setItem('lastSubmittedQuestionUniqueId', question.uniqueId);
         },
         error: (error) => {
@@ -53,20 +51,8 @@ export class ContactFacade {
     );
   }
 
-  loadQuestionByUniqueId(questionUniqueId: string) {
-    return this.interviewService.getQuestionByUniqueId(questionUniqueId).pipe(
-      tap({
-        next: (question) => {
-          if (question.status === QuestionStatusEnum.Pending) {
-            interviewStore.update(addEntities(question));
-          }
-          return question;
-        },
-        error: (error) => {
-          console.error('Error getting question', error);
-        }
-      })
-    );
+  getQuestionByUniqueId(questionUniqueId: string) {
+    return this.interviewService.getQuestionByUniqueId(questionUniqueId);
   }
 
   loadAnsweredQuestions() {
