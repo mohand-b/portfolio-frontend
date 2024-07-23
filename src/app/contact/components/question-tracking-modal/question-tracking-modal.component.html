@@ -11,6 +11,10 @@
     </div>
   </form>
 
+  @if (isIncorrectUniqueId()) {
+    <ngb-alert type="danger" (closed)="isIncorrectUniqueId.set(false)">Question introuvable</ngb-alert>
+  }
+
   @if (question(); as question) {
     <div class="overflow-x-auto">
       <div class="min-w-full">
