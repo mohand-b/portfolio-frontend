@@ -26,22 +26,21 @@ import {MatBadgeModule} from "@angular/material/badge";
 })
 export class ContactComponent implements OnInit {
 
-  lastSubmittedQuestionUniqueId: string | null = localStorage.getItem('lastSubmittedQuestionUniqueId');
-  lastSubmittedQuestion: WritableSignal<QuestionDto | null> = signal(null);
   contactFacade = inject(ContactFacade);
+  lastSubmittedQuestionUniqueId: Signal<string | null> = this.contactFacade.lastSubmittedQuestionUniqueId;
   questions$: Signal<QuestionDto[]> = this.contactFacade.questions$;
   isLoading$: WritableSignal<boolean> = signal(false);
-  private modalService = inject(NgbModal);
-  private fb = inject(NonNullableFormBuilder);
-  questionFormControl = this.fb.control('', {
-    validators: [Validators.required, Validators.minLength(3)]
-  });
   toggleQuestionFormState = effect(() => {
     if (this.isLoading$()) {
       this.questionFormControl.disable();
     } else {
       this.questionFormControl.enable();
     }
+  });
+  private modalService = inject(NgbModal);
+  private fb = inject(NonNullableFormBuilder);
+  questionFormControl = this.fb.control('', {
+    validators: [Validators.required, Validators.minLength(3)]
   });
   contactFormGroup = this.fb.group({
     name: this.fb.control<string>('', Validators.required),
@@ -56,14 +55,6 @@ export class ContactComponent implements OnInit {
     this.contactFacade.loadAnsweredQuestions().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe();
-
-    if (this.lastSubmittedQuestionUniqueId) {
-      this.contactFacade.getQuestionByUniqueId(this.lastSubmittedQuestionUniqueId).pipe(
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe({
-        next: (question) => this.lastSubmittedQuestion.set(question)
-      });
-    }
   }
 
   onSubmitQuestion(event: Event) {
@@ -74,7 +65,6 @@ export class ContactComponent implements OnInit {
     }
     this.contactFacade.submitQuestion(this.questionFormControl.value).subscribe({
       next: (question) => {
-        this.lastSubmittedQuestionUniqueId = question.uniqueId;
         this.questionFormControl.reset()
       },
       error: (error) => console.error('Erreur lors de la soumission', error)
@@ -104,8 +94,5 @@ export class ContactComponent implements OnInit {
       size: 'lg',
       centered: true
     })
-
-    modalRef.componentInstance.uniqueId = localStorage.getItem('lastSubmittedQuestionUniqueId');
-    modalRef.componentInstance.lastSubmittedQuestion = this.lastSubmittedQuestion;
   }
 }

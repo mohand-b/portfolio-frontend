@@ -68,7 +68,8 @@
           Envoyer votre question
         </button>
 
-        <button (click)="onOpenQuestionTrackingModal()" [matBadgeHidden]="!lastSubmittedQuestionUniqueId" [matBadge]="1"
+        <button (click)="onOpenQuestionTrackingModal()" [matBadgeHidden]="!lastSubmittedQuestionUniqueId()"
+                [matBadge]="1"
                 class="btn btn-warning w-auto self-start"
                 matBadgeColor="accent"
                 type="button">

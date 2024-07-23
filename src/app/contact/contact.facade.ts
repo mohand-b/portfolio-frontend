@@ -1,8 +1,8 @@
-import {createStore} from "@ngneat/elf";
+import {createStore, select, setProps, withProps} from "@ngneat/elf";
 import {inject, Injectable, Signal} from "@angular/core";
 import {InterviewService} from "./state/interview/interview.service";
 import {QuestionDto, QuestionStatusEnum} from "./state/interview/interview.model";
-import {deleteEntities, selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
+import {selectAllEntities, setEntities, withEntities} from "@ngneat/elf-entities";
 import {map, tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ContactService} from "./state/contact/contact.service";
@@ -12,12 +12,20 @@ const interviewStore = createStore({
     name: 'interview',
   },
   withEntities<QuestionDto>(),
+  withProps<{ lastSubmittedQuestionUniqueId: string | null }>({
+    lastSubmittedQuestionUniqueId: localStorage.getItem('lastSubmittedQuestionUniqueId')
+  }),
 )
 
 @Injectable({providedIn: 'root'})
 export class ContactFacade {
 
 
+  lastSubmittedQuestionUniqueId = toSignal(
+    interviewStore.pipe(select(state => state.lastSubmittedQuestionUniqueId))
+    , {
+      initialValue: localStorage.getItem('lastSubmittedQuestionUniqueId')
+    });
   questions$: Signal<QuestionDto[]> = toSignal(interviewStore.pipe(
     selectAllEntities(),
     map((questions: QuestionDto[]) => questions.sort((a, b) => {
@@ -42,6 +50,7 @@ export class ContactFacade {
     return this.interviewService.submitQuestion(question).pipe(
       tap({
         next: (question) => {
+          interviewStore.update(setProps({lastSubmittedQuestionUniqueId: question.uniqueId}));
           localStorage.setItem('lastSubmittedQuestionUniqueId', question.uniqueId);
         },
         error: (error) => {
@@ -79,7 +88,7 @@ export class ContactFacade {
     return this.interviewService.deleteQuestion(questionId).pipe(
       tap({
         next: () => {
-          interviewStore.update(deleteEntities(questionId));
+          interviewStore.update(setProps({lastSubmittedQuestionUniqueId: null}));
           localStorage.removeItem('lastSubmittedQuestionUniqueId');
         },
         error: (error) => {

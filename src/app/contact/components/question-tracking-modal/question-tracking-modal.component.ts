@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, Input, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, effect, inject, signal, WritableSignal} from '@angular/core';
 import {NgbActiveModal, NgbAlert} from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {QuestionDto, QuestionStatusEnum} from "../../state/interview/interview.model";
@@ -18,34 +18,34 @@ import {ContactFacade} from "../../contact.facade";
   templateUrl: './question-tracking-modal.component.html',
   styleUrl: './question-tracking-modal.component.scss'
 })
-export class QuestionTrackingModalComponent implements OnInit {
+export class QuestionTrackingModalComponent {
 
-  @Input() uniqueId?: string;
-  lastSubmittedQuestion = input<QuestionDto | null>(null);
   question: WritableSignal<QuestionDto | null> = signal(null);
   public modal = inject(NgbActiveModal);
   isIncorrectUniqueId: WritableSignal<boolean> = signal(false);
   private fb = inject(NonNullableFormBuilder);
-  questionTrackingFormControl = this.fb.control(
-    this.uniqueId ?? '',
+  questionTrackingFormControl = this.fb.control('',
     {
       validators: [Validators.required, Validators.minLength(3)]
     });
   private contactFacade = inject(ContactFacade);
+  lastSubmittedQuestionUniqueId = this.contactFacade.lastSubmittedQuestionUniqueId;
 
   constructor() {
     effect(() => {
-      if (this.lastSubmittedQuestion()) {
-        this.question.set(this.lastSubmittedQuestion())
+      if (this.lastSubmittedQuestionUniqueId()) {
+        this.questionTrackingFormControl.setValue(this.lastSubmittedQuestionUniqueId()!);
+        this.contactFacade.getQuestionByUniqueId(this.lastSubmittedQuestionUniqueId()!).subscribe({
+          next: question => {
+            this.question.set(question);
+          }
+        })
       }
     }, {
       allowSignalWrites: true
     });
   }
 
-  ngOnInit(): void {
-    this.questionTrackingFormControl.setValue(this.uniqueId!);
-  }
 
   onTrackQuestion() {
     this.contactFacade.getQuestionByUniqueId(this.questionTrackingFormControl.value).subscribe({
@@ -70,5 +70,14 @@ export class QuestionTrackingModalComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  onCancelQuestion() {
+    this.contactFacade.cancelQuestion(this.question()!.id).subscribe({
+      next: () => {
+        this.questionTrackingFormControl.reset();
+        this.question.set(null)
+      }
+    });
   }
 }

@@ -24,6 +24,7 @@
           <div class="font-semibold">Statut</div>
           <div class="font-semibold">Réponse/Raison</div>
           <div class="font-semibold">Créé le</div>
+          <div class="font-semibold">Actions</div>
         </div>
         <div class="grid grid-cols-5 gap-2 py-2">
           <div>{{ question.uniqueId }}</div>
@@ -31,6 +32,7 @@
           <div [ngClass]="getStatusClass(question.status)">{{ question.status }}</div>
           <div>{{ question.responseOrReason }}</div>
           <div>{{ question.createdAt | date:'short' }}</div>
+          <button (click)="onCancelQuestion()" class="btn btn-warning">Annuler</button>
         </div>
       </div>
     </div>
