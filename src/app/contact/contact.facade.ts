@@ -7,25 +7,20 @@ import {map, tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ContactService} from "./state/contact/contact.service";
 import {ContactDto} from "./state/contact/contact.model";
+import {CookieService} from "ngx-cookie-service";
 
 const interviewStore = createStore({
     name: 'interview',
   },
   withEntities<QuestionDto>(),
   withProps<{ lastSubmittedQuestionUniqueId: string | null }>({
-    lastSubmittedQuestionUniqueId: localStorage.getItem('lastSubmittedQuestionUniqueId')
+    lastSubmittedQuestionUniqueId: null
   }),
 )
 
 @Injectable({providedIn: 'root'})
 export class ContactFacade {
 
-
-  lastSubmittedQuestionUniqueId = toSignal(
-    interviewStore.pipe(select(state => state.lastSubmittedQuestionUniqueId))
-    , {
-      initialValue: localStorage.getItem('lastSubmittedQuestionUniqueId')
-    });
   questions$: Signal<QuestionDto[]> = toSignal(interviewStore.pipe(
     selectAllEntities(),
     map((questions: QuestionDto[]) => questions.sort((a, b) => {
@@ -38,7 +33,12 @@ export class ContactFacade {
     }))), {
     initialValue: []
   });
-
+  private cookieService = inject(CookieService);
+  lastSubmittedQuestionUniqueId = toSignal(
+    interviewStore.pipe(select(state => state.lastSubmittedQuestionUniqueId))
+    , {
+      initialValue: this.cookieService.get('lastSubmittedQuestionUniqueId')
+    });
   private interviewService = inject(InterviewService);
   private contactService = inject(ContactService);
 
@@ -50,8 +50,11 @@ export class ContactFacade {
     return this.interviewService.submitQuestion(question).pipe(
       tap({
         next: (question) => {
+          this.cookieService.set('lastSubmittedQuestionUniqueId', question.uniqueId, {
+            secure: true,
+            sameSite: 'Strict'
+          });
           interviewStore.update(setProps({lastSubmittedQuestionUniqueId: question.uniqueId}));
-          localStorage.setItem('lastSubmittedQuestionUniqueId', question.uniqueId);
         },
         error: (error) => {
           console.error('Error submitting question', error);
@@ -72,7 +75,7 @@ export class ContactFacade {
           if (storedUniqueId) {
             const questionExists = questions.some(question => question.uniqueId === storedUniqueId);
             if (questionExists) {
-              localStorage.removeItem('lastSubmittedQuestionUniqueId');
+              this.cookieService.delete('lastSubmittedQuestionUniqueId');
             }
           }
           interviewStore.update(setEntities(questions));
@@ -89,7 +92,7 @@ export class ContactFacade {
       tap({
         next: () => {
           interviewStore.update(setProps({lastSubmittedQuestionUniqueId: null}));
-          localStorage.removeItem('lastSubmittedQuestionUniqueId');
+          this.cookieService.delete('lastSubmittedQuestionUniqueId');
         },
         error: (error) => {
           console.error('Error deleting question', error);
